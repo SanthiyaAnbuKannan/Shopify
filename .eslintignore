@@ -1,0 +1,6 @@
+node_modules
+build
+public/build
+*/*.yml
+.shopify
+extensions/product-edit-action/shopify.d.ts
