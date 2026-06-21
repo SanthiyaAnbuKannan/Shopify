@@ -155,9 +155,9 @@ export async function action({ request, params }) {
       const origTaxCode = formData.get("orig_taxCode");
 
       pricingChanged =
-        price !== origPrice ||
-        compareAtPrice !== origCompareAtPrice ||
-        costPerItem !== origCostPerItem ||
+        normalizePrice(price) !== normalizePrice(origPrice) ||
+        normalizePrice(compareAtPrice) !== normalizePrice(origCompareAtPrice) ||
+        normalizePrice(costPerItem) !== normalizePrice(origCostPerItem) ||
         taxable !== (origTaxable === "true") ||
         taxCode !== origTaxCode;
 
@@ -573,13 +573,13 @@ export default function ProductEditPage() {
   }
 
   const pricingDirty =
-    formState.pricing.price !== pricingBaseline.price ||
-    formState.pricing.compareAtPrice !== pricingBaseline.compareAtPrice ||
-    formState.pricing.costPerItem !== pricingBaseline.costPerItem ||
+    normalizePrice(formState.pricing.price) !== normalizePrice(pricingBaseline.price) ||
+    normalizePrice(formState.pricing.compareAtPrice) !== normalizePrice(pricingBaseline.compareAtPrice) ||
+    normalizePrice(formState.pricing.costPerItem) !== normalizePrice(pricingBaseline.costPerItem) ||
     formState.pricing.taxable !== pricingBaseline.taxable ||
     formState.pricing.taxCode !== pricingBaseline.taxCode;
 
-  // Get original quantity for currently selected location
+  // Get original quantity for the currently selected location
   const origInventoryLevels = localInventoryLevels ?? inventoryFetcher.data?.inventoryLevels ?? [];
   const origLevelForCurrentLocation = origInventoryLevels.find(
     l => l.locationId === formState.inventory?.locationId
@@ -1128,6 +1128,12 @@ Field.propTypes = {
   required: PropTypes.bool,
   children: PropTypes.node.isRequired,
 };
+
+function normalizePrice(value) {
+  if (!value || value === "") return null;
+  const num = parseFloat(value);
+  return isNaN(num) ? null : num;
+}
 
 // Error Boundary 
 export function ErrorBoundary() {
