@@ -1,0 +1,45 @@
+PR Title:
+Product Edit Flow — Group 2 (Pricing & Inventory)
+PR Description:
+## Overview
+Implements the Product Edit Flow for Group 2 — Pricing & Inventory tabs — 
+within the Codem Shopify embedded app.
+
+## Route
+`/app/products/:handle/edit`
+
+## Tabs
+- **Tab A: Pricing** — Price, compare-at price, cost per item, taxable, tax code, currency
+- **Tab B: Inventory** — Track quantity, quantity per location, allow oversell, SKU, barcode (lazy-loaded)
+
+## Diff Strategy
+On save, the form submits both current values and original values (prefixed `orig_`).
+The action computes a diff before firing any mutations:
+- If nothing changed → zero mutations fire (no-op save)
+- If pricing fields changed → `productVariantsBulkUpdate` fires
+- If cost per item changed → `inventoryItemUpdate` fires
+- If inventory quantity changed → `inventoryAdjustQuantities` fires
+- If oversell policy changed → `productVariantsBulkUpdate` fires
+- If SKU changed → `productVariantsBulkUpdate` (with inventoryItem.sku) fires
+- If barcode changed → `productVariantsBulkUpdate` fires
+- If tracked changed → `inventoryItemUpdate` fires
+- If both pricing and inventory changed → all relevant mutations fire in one submission
+
+## Global Save / Discard
+- Persistent header bar with Save and Discard buttons outside tab content
+- Shared state via `useReducer` — switching tabs never resets unsaved edits
+- Global `isDirty` flag derived by diffing combined form state against original values
+- Save disabled when `isDirty` is false
+- Discard reverts entire combined form state to original loader values
+
+## Lazy Loading
+Tab B (Inventory) is never loaded in the initial loader response.
+It is fetched via `useFetcher` only when the merchant clicks the Inventory tab for the first time.
+
+## Admin Extension
+Reads product ID from extension context → resolves handle via GraphQL → 
+navigates to edit page → closes modal immediately.
+`APP_HANDLE` defined in centralised `config.js`.
+
+## Error Messages
+All 10 deterministic error messages (E-01 to E-10) implemented verbatim per spec.
