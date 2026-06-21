@@ -579,7 +579,7 @@ export default function ProductEditPage() {
     formState.pricing.taxable !== pricingBaseline.taxable ||
     formState.pricing.taxCode !== pricingBaseline.taxCode;
 
-  // Get original quantity for currently selected location
+  // Get original quantity for the currently selected location
   const origInventoryLevels = localInventoryLevels ?? inventoryFetcher.data?.inventoryLevels ?? [];
   const origLevelForCurrentLocation = origInventoryLevels.find(
     l => l.locationId === formState.inventory?.locationId
